@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+authors = [{ name = "Luca Marchetti" }]
+name = "fitter"
+description = "A small Python library for fitting datasets."
+version = "0.1.0"
+requires-python = ">=3.8"
+readme = "README.MD"
+license = { text = "MIT" }
+dependencies = ["numpy", "scipy"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# [tool.setuptools.package-data]
+# plotter = [""]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 119
+
+[project.urls]
+Repository = "https://github.com/lmarchetti02/fitter"
