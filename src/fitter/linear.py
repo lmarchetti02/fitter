@@ -2,6 +2,8 @@ import numpy as np
 from numba import njit
 from typing import Optional
 
+# TODO: Add documentation
+
 
 @njit
 def _is_all_equal(data: np.ndarray) -> bool:
