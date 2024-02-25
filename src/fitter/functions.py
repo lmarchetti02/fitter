@@ -91,14 +91,17 @@ def function_fit(
     # output
     if len(parameters) == len(names):
         if display:
-            print("----------------- RESULTS FROM FIT ----------------- \n")
-            print(f"{'R2:':<35} {np.round(R2, 3):>16} \n")
+            print("====================================================")
+            print("=====             RESULTS FROM FIT             =====")
+            print("====================================================\n")
 
             for i, name in enumerate(names):
                 print(f"{f'Estimated value of {name}:':<35} {f'{parameters[i]:.4e}':>16}")
                 print(f"{f'Error on estimated value of {name}:':<35} {f'{errors[i]:.1e}':>16} \n")
 
-            print("---------------------------------------------------- \n")
+            print(f"{'R2:':<35} {np.round(R2, 3):>16} \n")
+
+            print("====================================================\n")
     else:
         raise ValueError("Too many/few names for the variables.")
 
