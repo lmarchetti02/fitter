@@ -2,8 +2,6 @@ import numpy as np
 from numba import njit
 from typing import Optional
 
-# TODO: Add documentation
-
 
 @njit
 def _is_all_equal(data: np.ndarray) -> bool:
@@ -20,7 +18,12 @@ def _is_all_equal(data: np.ndarray) -> bool:
 
 
 def _linear_fit_nw(x: np.ndarray, y: np.ndarray, y_err: float, display: bool):
-    """ """
+    """
+    This is an helper function for `linear_fit()`.
+
+    It performs the linear fit when the errors on the y-values
+    are all the same, that is, the fit in not weighted.
+    """
 
     # calculate fit parameters
     D = np.array([[len(x), x.sum()], [x.sum(), (x**2).sum()]])
@@ -34,7 +37,33 @@ def _linear_fit_nw(x: np.ndarray, y: np.ndarray, y_err: float, display: bool):
 
 
 def linear_fit(x: np.ndarray, y: np.ndarray, y_err: np.ndarray, display: Optional[bool] = True):
-    """ """
+    """
+    This function performs a linear fit on a set of
+    (x,y) points given by the user.
+
+    IMPORTANT: The linear fit has the form: y = a + bx.
+
+    Parameters
+    ---
+    x: numpy.ndarray
+        The array with the x-values.
+    y: numpy.ndarray
+        The array with the y-values.
+    y_err: numpy.ndarray
+        The array with the errors on the y-values.
+
+    Optional Parameters
+    ---
+    display: bool
+        Whether to display the results or not.
+        It is set to `True` by default.
+
+    Returns
+    ---
+    An unpacked list with the values of the fit parameters,
+    their errors, and the correlation coefficient in the
+    following order: a,b,a_err,b_err,r.
+    """
 
     parameters = None
     errors = None
