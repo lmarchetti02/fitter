@@ -68,6 +68,9 @@ def function_fit(
     p0: list
         The list with the initial guesses on the
         values of the fit parameters.
+    nw: bool
+        Force the use of a non-weighted fit.
+        It is set to `False` by default.
 
     Returns
     ---
@@ -80,6 +83,10 @@ def function_fit(
 
     # get initial values for parameters
     p0 = kwargs.get("p0", None)
+
+    # weighted or not
+    nw = kwargs.get("nw", False)
+    y_err = y_err if not nw else np.full(len(y_err), max(y_err))
 
     parameters, cov_matrix = curve_fit(f, x, y, sigma=y_err, p0=p0)
 
@@ -106,3 +113,7 @@ def function_fit(
         raise ValueError("Too many/few names for the variables.")
 
     return *parameters, *errors
+
+
+if __name__ == "__main__":
+    pass
