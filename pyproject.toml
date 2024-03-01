@@ -24,7 +24,7 @@ addopts = "-ra -q"
 testpaths = ["tests"]
 
 [tool.black]
-line-length = 119
+line-length = 100
 
 [project.urls]
 Repository = "https://github.com/lmarchetti02/fitter"

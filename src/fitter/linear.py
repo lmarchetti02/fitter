@@ -17,7 +17,7 @@ def _is_all_equal(data: np.ndarray) -> bool:
     return True
 
 
-def _linear_fit_nw(x: np.ndarray, y: np.ndarray, y_err: float, display: bool):
+def _linear_fit_nw(x: np.ndarray, y: np.ndarray, y_err: float):
     """
     This is an helper function for `linear_fit()`.
 
@@ -36,7 +36,13 @@ def _linear_fit_nw(x: np.ndarray, y: np.ndarray, y_err: float, display: bool):
     return parameters, errors
 
 
-def linear_fit(x: np.ndarray, y: np.ndarray, y_err: np.ndarray, display: Optional[bool] = True):
+def linear_fit(
+    x: np.ndarray,
+    y: np.ndarray,
+    y_err: np.ndarray,
+    display: Optional[bool] = True,
+    nw: Optional[bool] = False,
+):
     """
     This function performs a linear fit on a set of
     (x,y) points given by the user.
@@ -57,6 +63,9 @@ def linear_fit(x: np.ndarray, y: np.ndarray, y_err: np.ndarray, display: Optiona
     display: bool
         Whether to display the results or not.
         It is set to `True` by default.
+    nw: bool
+        Force the use of a non-weighted fit.
+        It is set to `False` by default.
 
     Returns
     ---
@@ -68,7 +77,7 @@ def linear_fit(x: np.ndarray, y: np.ndarray, y_err: np.ndarray, display: Optiona
     parameters = None
     errors = None
 
-    if not _is_all_equal(y_err):
+    if not _is_all_equal(y_err) and not nw:
 
         # weights
         w = 1 / y_err**2
@@ -81,7 +90,7 @@ def linear_fit(x: np.ndarray, y: np.ndarray, y_err: np.ndarray, display: Optiona
         parameters = np.dot(D_inv, B)
         errors = np.sqrt(np.array([D_inv[0][0], D_inv[1][1]]))
     else:
-        parameters, errors = _linear_fit_nw(x, y, y_err[0], display)
+        parameters, errors = _linear_fit_nw(x, y, max(y_err), display)
 
     # correlation coefficient
     ssx = ((x - x.mean()) ** 2).sum()
@@ -110,3 +119,88 @@ def linear_fit(x: np.ndarray, y: np.ndarray, y_err: np.ndarray, display: Optiona
         print("==================================================== \n")
 
     return *parameters, *errors, r
+
+
+def linear_fit_origin(
+    x: np.ndarray,
+    y: np.ndarray,
+    y_err: np.ndarray,
+    display: Optional[bool] = True,
+    nw: Optional[bool] = False,
+):
+    """
+    This function performs a linear fit through the origin
+    on a set of (x,y) points given by the user.
+
+    IMPORTANT: The linear fit has the form: y = ax.
+
+    Parameters
+    ---
+    x: numpy.ndarray
+        The array with the x-values.
+    y: numpy.ndarray
+        The array with the y-values.
+    y_err: numpy.ndarray
+        The array with the errors on the y-values.
+
+    Optional Parameters
+    ---
+    display: bool
+        Whether to display the results or not.
+        It is set to `True` by default.
+    nw: bool
+        Force the use of a non-weighted fit.
+        It is set to `False` by default.
+
+    Returns
+    ---
+    An unpacked list with the values of the fit parameters,
+    their errors, and the correlation coefficient in the
+    following order: a,b,a_err,b_err,r.
+    """
+
+    parameter = None
+    error = None
+
+    # weights
+    w = 1 / y_err**2
+
+    if not _is_all_equal(y_err) and not nw:
+
+        parameter = ((w * x * y).sum()) / ((w * x**2).sum())
+        error = np.sqrt(1 / ((w * x**2).sum()))
+
+    else:
+        parameter = ((x * y).sum()) / ((x**2).sum())
+        error = np.sqrt(1 / ((x**2).sum())) * max(y_err)
+
+    # correlation coefficient
+    ssx = ((x - x.mean()) ** 2).sum()
+    ssy = ((y - y.mean()) ** 2).sum()
+    num = ((x - x.mean()) * (y - y.mean())).sum()
+
+    r = num / np.sqrt(ssx * ssy)
+
+    # standard error of the estimate
+    see = np.sqrt(((1 - r**2) * ssy) / (len(x) - 1))
+
+    if display:
+        names = ["a", "b"]
+
+        print("====================================================")
+        print("=====             RESULTS FROM FIT             =====")
+        print("====================================================\n")
+
+        print(f"{f'Estimated value of a:':<35} {f'{parameter:.4e}':>16}")
+        print(f"{f'Error on estimated value of a:':<35} {f'{error:.1e}':>16} \n")
+
+        print(f"{'Correlation coefficient:':<35} {np.round(r, 3):>16}")
+        print(f"{'Standard error of the estimate:':<35} {see:>16.1e} \n")
+
+        print("==================================================== \n")
+
+    return parameter, error, r
+
+
+if __name__ == "__main__":
+    pass
