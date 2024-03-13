@@ -200,13 +200,14 @@ def function_fit_odr(
                 print(f"{f'Estimated value of {name}:':<35} {f'{parameters[i]:.4e}':>16}")
                 print(f"{f'Error on estimated value of {name}:':<35} {f'{errors[i]:.1e}':>16} \n")
 
-            print(f"{'R2:':<35} {np.round(R2, 3):>16} \n")
+            print(f"{'R2:':<35} {np.round(R2, 3):>16}")
+            print(f"{'Chi2:':<35} {np.round(output.sum_square, 3):>16} \n")
 
             print("====================================================\n")
     else:
         raise ValueError("Too many/few names for the variables.")
 
-    return *parameters, *errors
+    return *parameters, *errors, output.sum_square
 
 
 if __name__ == "__main__":
