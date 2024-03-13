@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from typing import Callable, Optional
+from scipy.odr import ODR, RealData, Model
 
 
 def cod(y: np.ndarray, f: np.ndarray, n_params: Optional[int] = None) -> float:
@@ -94,6 +95,99 @@ def function_fit(
 
     # coefficient of determination
     R2 = cod(y, f(x, *parameters))
+
+    # output
+    if len(parameters) == len(names):
+        if display:
+            print("====================================================")
+            print("=====             RESULTS FROM FIT             =====")
+            print("====================================================\n")
+
+            for i, name in enumerate(names):
+                print(f"{f'Estimated value of {name}:':<35} {f'{parameters[i]:.4e}':>16}")
+                print(f"{f'Error on estimated value of {name}:':<35} {f'{errors[i]:.1e}':>16} \n")
+
+            print(f"{'R2:':<35} {np.round(R2, 3):>16} \n")
+
+            print("====================================================\n")
+    else:
+        raise ValueError("Too many/few names for the variables.")
+
+    return *parameters, *errors
+
+
+def function_fit_odr(
+    x: np.ndarray,
+    y: np.ndarray,
+    x_err: np.ndarray,
+    y_err: np.ndarray,
+    f: Callable[[list[float], float], float],
+    p0: list[float],
+    names: tuple[str, ...],
+    display: Optional[bool] = True,
+):
+    """
+    This function performs a functional fit on a set
+    of (x,y) points given as inputs. It takes into
+    account both the errors on the x-values and on
+    the y-values.
+
+    Parameters
+    ---
+    x: numpy.ndarray
+        The array with the x-values.
+    y: numpy.ndarray
+        The array with the y-values.
+    x_err: numpy.ndarray
+        The array with the error on the x-values.
+    y_err: numpy.ndarray
+        The array with the error on the y-values.
+    f: 1D-function
+        The function used for fitting. It has to be
+        defined as follows:
+        >>> def f(B, x):
+                B[0] + B[1]*x + B[2]*x**2
+
+        with the parameters to be fitted as a list.
+    p0: list
+        The list with the initial guesses on the
+        values of the fit parameters.
+    names: tuple[str]
+        The tuple with the names of the parameters
+        of the fit function.
+
+    Optional Parameters
+    ---
+    display: bool
+        Whether to display the result or not.
+
+    Returns
+    ---
+    An unpacked list with the estimates on parameters and their
+    errors, in the following order: p1,p2,...,e1,e2,...
+    """
+
+    if len(x) != len(y) and len(x) != len(y_err) and len(x) != len(x_err):
+        raise ValueError("The arrays don't have the same size")
+
+    # define model
+    model = Model(f)
+
+    # define data to be fitted
+    data = RealData(x, y, x_err, y_err)
+
+    # define the odr object
+    odr = ODR(data, model, beta0=p0)
+
+    # run the regression
+    output = odr.run()
+
+    # get results
+    parameters = output.beta
+    errors = output.sd_beta
+
+    # coefficient of determination
+    R2 = cod(y, f(parameters, x))
 
     # output
     if len(parameters) == len(names):
