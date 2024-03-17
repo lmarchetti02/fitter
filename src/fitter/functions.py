@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit
 from scipy.optimize import curve_fit
 from typing import Callable, Optional
 from scipy.odr import ODR, RealData, Model
@@ -30,6 +31,17 @@ def cod(y: np.ndarray, f: np.ndarray, n_params: Optional[int] = None) -> float:
         R2 = 1 - (1 - R2) * ((len(y) - 1) / (len(y) - n_params - 1))
 
     return R2
+
+
+@njit
+def _check_zeros(arr: np.ndarray) -> list:
+    indexes = []
+
+    for i, val in enumerate(arr):
+        if val == 0:
+            indexes.append(i)
+
+    return indexes
 
 
 def function_fit(
@@ -81,6 +93,13 @@ def function_fit(
 
     if len(x) != len(y) and len(x) != len(y_err):
         raise ValueError("The arrays don't have the same size")
+
+    # remove zeros
+    indexes = _check_zeros(y_err)
+
+    x = np.delete(x, indexes)
+    y = np.delete(y, indexes)
+    y_err = np.delete(y_err, indexes)
 
     # get initial values for parameters
     p0 = kwargs.get("p0", None)
@@ -169,6 +188,14 @@ def function_fit_odr(
 
     if len(x) != len(y) and len(x) != len(y_err) and len(x) != len(x_err):
         raise ValueError("The arrays don't have the same size")
+
+    # remove zeros
+    indexes = [_check_zeros(x_err), _check_zeros(y_err)]
+    for _ in indexes:
+        x = np.delete(x, _)
+        y = np.delete(y, _)
+        x_err = np.delete(x_err, _)
+        y_err = np.delete(y_err, _)
 
     # define model
     model = Model(f)
