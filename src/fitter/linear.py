@@ -90,7 +90,7 @@ def linear_fit(
         parameters = np.dot(D_inv, B)
         errors = np.sqrt(np.array([D_inv[0][0], D_inv[1][1]]))
     else:
-        parameters, errors = _linear_fit_nw(x, y, max(y_err), display)
+        parameters, errors = _linear_fit_nw(x, y, max(y_err))
 
     # correlation coefficient
     ssx = ((x - x.mean()) ** 2).sum()

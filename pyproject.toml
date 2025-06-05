@@ -9,14 +9,11 @@ description = "A small Python library for fitting datasets."
 version = "0.1.0"
 requires-python = ">=3.8"
 readme = "README.MD"
-license = { text = "MIT" }
+license = "MIT"
 dependencies = ["numpy", "scipy", "numba"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-# [tool.setuptools.package-data]
-# plotter = [""]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
